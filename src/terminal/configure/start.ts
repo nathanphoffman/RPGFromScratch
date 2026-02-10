@@ -21,9 +21,17 @@ export function startTerminal() {
 
     (async () => {
         let pyodide = await loadPyodide();
-        console.log(pyodide.runPython(`
-            2+3
-        `));
+
+        const response = await fetch("movement.py");
+
+        if (response.ok) {
+            const pyCode = await response.text();
+            
+            console.log(pyCode);
+
+            const output = pyodide.runPython(`${pyCode}`);
+            console.log(output);
+        }
     })();
 
 }

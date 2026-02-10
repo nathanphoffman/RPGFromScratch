@@ -9,7 +9,7 @@ import { generadeDoodadsLayer } from "./layers/doodads";
 import { generateGridCanvasLayer } from "./layers/grid";
 import { generatePlayerCanvasLayer } from "./layers/player";
 import { playMusic } from "./sound";
-import { startTerminal } from "./terminal";
+import { startTerminal } from "./terminal/configure/start";
 
 import type { Config } from "./types";
 

@@ -125,7 +125,7 @@ function getHeading(currentMoveTo: Coord, player: any, CONFIG: Config) {
         east: x1 + MOVE_ERROR < x2
     }
 
-    console.log(isHeaded);
+    //console.log(isHeaded);
 
     const headingVertical = isHeaded.south || isHeaded.north;
     const headingHorizontal = isHeaded.east || isHeaded.west;
