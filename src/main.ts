@@ -8,6 +8,7 @@ import { generadeDoodadsLayer } from "./layers/doodads";
 import { generateGridCanvasLayer } from "./layers/grid";
 import { generatePlayerCanvasLayer } from "./layers/player";
 import { playMusic } from "./sound";
+import { startTerminal } from "./terminal";
 
 import type { Config } from "./types";
 
@@ -19,6 +20,8 @@ import type { Config } from "./types";
     HEIGHT: Math.floor(64 * 10),
     SCALE: 1
   }
+
+  startTerminal();
 
   // the grid canvas lays on top so we attach even listeners to it
   const gridCanvas = generateGridCanvasLayer(CONFIG);

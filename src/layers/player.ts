@@ -1,10 +1,9 @@
 import { playMusic } from "../sound";
 import { loadSpriteImage } from "../sprite";
-import type { Config, Coord } from "../types";
+import type { Config, Coord, Direction, TerminalHook } from "../types";
 import { adjustCanvasSizeAndScale, clearCanvas, futureCollisionOnAxis, getPositionOfClick } from "../utility";
 
 export async function generatePlayerCanvasLayer(CONFIG: Config, gridCanvas: HTMLCanvasElement) {
-
 
     const { SIZE } = CONFIG;
 
@@ -17,16 +16,6 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, gridCanvas: HTML
 
     adjustCanvasSizeAndScale(canvas, CONFIG);
 
-    gridCanvas.addEventListener('click', (e) => {
-
-        playMusic();
-
-        currentMoveTo = getPositionOfClick(canvas, e)
-        currentMoveTo = undoMoveToOffset(currentMoveTo, CONFIG);
-
-        //console.log("clicked at ", currentMoveTo);
-    });
-
     let player = {
         x: canvas.width / 2,
         y: canvas.height / 2,
@@ -36,6 +25,25 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, gridCanvas: HTML
 
     let currentMoveTo: Coord = [player.x, player.y];
 
+    gridCanvas.addEventListener('click', (e) => {
+
+        //playMusic();
+
+        currentMoveTo = getPositionOfClick(canvas, e)
+        currentMoveTo = undoMoveToOffset(currentMoveTo, CONFIG);
+
+        // we must notify the terminal if the player clicks 
+        const { headingPrefix } = getHeading(currentMoveTo, player, CONFIG);
+        //terminalHook(headingPrefix);
+
+        setTimeout(() => {
+            const term = document.getElementsByClassName("xt")[0];
+            term?.focus();
+        }, 10);
+
+    });
+
+    
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -99,22 +107,46 @@ function drawMoveTo(currentMoveTo: Coord, ctx: CanvasRenderingContext2D, CONFIG:
 
 let flipFlop = false;
 
-function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any, CONFIG: Config) {
+function getHeading(currentMoveTo: Coord, player: any, CONFIG: Config) {
 
-    const MOVE_AMOUNT = CONFIG.SIZE;
+    const SIZE = CONFIG.SIZE;
 
     const [x1, y1] = [player.x, player.y];
     const [x2, y2] = currentMoveTo;
+    const MOVE_ERROR = SIZE / 2;
 
-    const MOVE_ERROR = MOVE_AMOUNT / 2;
+      const isHeaded: Direction = {
 
-    type direction = { west: any, east: any, south: any, north: any }
+        // keep north/south here so they come first in prefix generation
+        north: y1 - MOVE_ERROR > y2,
+        south: y1 + MOVE_ERROR < y2,
+        
+        west: x1 - MOVE_ERROR > x2,
+        east: x1 + MOVE_ERROR < x2
+    }
+
+    console.log(isHeaded);
+
+    const headingVertical = isHeaded.south || isHeaded.north;
+    const headingHorizontal = isHeaded.east || isHeaded.west;
+
+    const headingPrefix = Object.keys(isHeaded).reduce((prefix, heading, idx) =>{
+        if(isHeaded[heading]) return prefix + String(heading)[0].toUpperCase();
+        else return prefix;
+    },"");
+
+    return { headingPrefix, headingVertical, headingHorizontal, isHeaded};
+
+}
+
+function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any, CONFIG: Config) {
+
+
+    const { headingVertical, headingHorizontal, isHeaded} = getHeading(currentMoveTo, player, CONFIG);
+
+    const MOVE_AMOUNT = CONFIG.SIZE;
 
     const move = (axis: "x" | "y", amount: number) => {
-
-        const newPosition = player[axis] + amount;
-
-        //console.log(collisionMap);
 
         const collisionDetected = collisionMap.find(coord => {
 
@@ -127,46 +159,34 @@ function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any,
             return collisionOnStaticAxis && collisionOnMovingAxis;
         });
 
-        if (collisionDetected) return () => { };
-
-        //console.log(currentMoveTo, player)
+        if (collisionDetected) return () => 0;
         return () => player[axis] += amount;
     }
 
     const moveTo: direction = {
         west: move("x", -MOVE_AMOUNT),
         east: move("x", +MOVE_AMOUNT),
-        south: move("y", -MOVE_AMOUNT),
-        north: move("y", MOVE_AMOUNT)
+        south: move("y", +MOVE_AMOUNT),
+        north: move("y", -MOVE_AMOUNT)
     }
-
-    const heading: direction = {
-        west: x1 - MOVE_ERROR > x2,
-        east: x1 + MOVE_ERROR < x2,
-        south: y1 - MOVE_ERROR > y2,
-        north: y1 + MOVE_ERROR < y2
-    }
-
-    const headingVertical = heading.south || heading.north;
-    const headingHorizontal = heading.east || heading.west;
 
     if (headingHorizontal && headingVertical) {
         const moveHorizontal = flipFlop = !flipFlop;
 
         if (moveHorizontal) {
-            if (heading.west) moveTo.west();
-            else if (heading.east) moveTo.east();
+            if (isHeaded.west) moveTo.west();
+            else if (isHeaded.east) moveTo.east();
         }
         else {
-            if (heading.south) moveTo.south();
-            else if (heading.north) moveTo.north();
+            if (isHeaded.south) moveTo.south();
+            else if (isHeaded.north) moveTo.north();
         }
     }
     else {
         // only 1 move is relevant in this scenario the find exits early on truthy,
         // we just need to find which direction is truthy which is the purpose of the find loop
-        Object.keys(heading).find(direction => {
-            if (heading[direction]) {
+        Object.keys(isHeaded).find(direction => {
+            if (isHeaded[direction]) {
                 moveTo[direction]();
                 return true;
             }
