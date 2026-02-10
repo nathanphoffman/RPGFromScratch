@@ -7,9 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simple Game</title>
   <style>
-
     body {
       background-color: #333;
+      /* cursor: none; */
+      height: 100vh;
+      overflow: hidden;
     }
 
     canvas.board {
@@ -23,6 +25,51 @@
     img {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
+    }
+
+
+    /* === CURSOR SWORD (BIG SIZE, 10px per block) === */
+    #cursor {
+      width: 50px;
+      /* Total width of cursor (5 blocks × 10px) */
+      height: 50px;
+      /* Total height of cursor (5 blocks × 10px) */
+      display: grid;
+      grid-template-columns: repeat(5, 10px);
+      /* 5 blocks horizontally, each 10px */
+      grid-template-rows: repeat(5, 10px);
+      /* 5 blocks vertically, each 10px */
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      will-change: transform;
+      backface-visibility: hidden;
+
+      /* Mouse position synced from JS */
+      --mouse-x: 0px;
+      --mouse-y: 0px;
+
+      /* Set position based on variables */
+      transform: translate3d(var(--mouse-x), var(--mouse-y), 0);
+      transform-origin: 100% 100%;
+      /* Rotation pivot from bottom-right */
+    }
+
+    /* Each pixel block */
+    #cursor>div {
+      width: 10px;
+      /* Individual pixel width (was 5px) */
+      height: 10px;
+      /* Individual pixel height (was 5px) */
+      background-color: transparent;
+    }
+
+    /* Filled pixel block (sword shape) */
+    #cursor .fill {
+      background-color: #f2c94c;
+      /* Gold-ish sword pixel */
     }
 
     #terminal {
@@ -52,16 +99,16 @@
     }
 
     .xt {
-      outline:none;
+      outline: none;
     }
-
   </style>
   <!--<script type="module" src="/src/main.ts"></script>-->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.29.1/full/pyodide.js"></script>
 </head>
 
 <body>
   <audio id="audio" src="music/battle.mp3"></audio>
-  
+
   <h3>The Tiny Mighty Tale</h3>
 
   <div id="game">
@@ -73,11 +120,46 @@
     </div>
 
     <div id="terminal"></div>
-    <img class="stone" src="stone.png"/>
+    <img class="stone" src="stone.png" />
   </div>
 
   <script type="module" src="/src/main.ts"></script>
   <script type="module" src="/src/terminal.ts"></script>
+
+
+  <!-- Custom Pixel Sword Cursor -->
+  <div id="cursor" style="display:none">
+    <!-- Row 1 -->
+    <div class="fill"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <!-- Row 2 -->
+    <div></div>
+    <div class="fill"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <!-- Row 3 -->
+    <div></div>
+    <div></div>
+    <div class="fill"></div>
+    <div></div>
+    <div class="fill"></div>
+    <!-- Row 4 -->
+    <div></div>
+    <div></div>
+    <div></div>
+    <div class="fill"></div>
+    <div></div>
+    <!-- Row 5 -->
+    <div></div>
+    <div></div>
+    <div class="fill"></div>
+    <div></div>
+    <div class="fill"></div>
+  </div>
 
 
 </body>

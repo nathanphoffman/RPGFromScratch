@@ -1,10 +1,14 @@
 import XTerminal from 'xterminal';
 
+declare global {
+    var loadPyodide: any
+}
+
 const TAILWIND_STYLES = ["italic", "text-stone-400", "text-white", "text-stone-200"] as const;
 type tailwind_styles = typeof TAILWIND_STYLES[number];
 const term = new XTerminal();
 
-export function startTerminal() {    
+export function startTerminal() {
     term.mount("#terminal");
     term.write("Hello World!\n");
     //term.clear();
@@ -14,6 +18,13 @@ export function startTerminal() {
         notable("There is an enemy here"),
         description("and then the rain can be heard again")
     );
+
+    (async () => {
+        let pyodide = await loadPyodide();
+        console.log(pyodide.runPython(`
+            2+3
+        `));
+    })();
 
 }
 
