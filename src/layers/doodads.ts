@@ -1,6 +1,6 @@
-import { loadSpriteFromSheet, loadSpriteImage, loadSpriteSheet } from "./sprite";
-import type { Config, Coord } from "./types";
-import { adjustCanvasSizeAndScale } from "./utility";
+import { loadSpriteFromSheet, loadSpriteImage, loadSpriteSheet } from "../sprite";
+import type { Config, Coord } from "../types";
+import { adjustCanvasSizeAndScale } from "../utility";
 
 export async function generadeDoodadsLayer(CONFIG: Config) {
 

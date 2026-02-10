@@ -1,7 +1,7 @@
-import { playMusic } from "./sound";
-import { loadSpriteImage } from "./sprite";
-import type { Config, Coord } from "./types";
-import { adjustCanvasSizeAndScale, clearCanvas, futureCollisionOnAxis, getPositionOfClick } from "./utility";
+import { playMusic } from "../sound";
+import { loadSpriteImage } from "../sprite";
+import type { Config, Coord } from "../types";
+import { adjustCanvasSizeAndScale, clearCanvas, futureCollisionOnAxis, getPositionOfClick } from "../utility";
 
 export async function generatePlayerCanvasLayer(CONFIG: Config, gridCanvas: HTMLCanvasElement) {
 

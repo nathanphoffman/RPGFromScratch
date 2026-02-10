@@ -1,6 +1,6 @@
-import { loadSpriteImage } from "./sprite";
-import type { Config } from "./types";
-import { adjustCanvasSizeAndScale } from "./utility";
+import { loadSpriteImage } from "../sprite";
+import type { Config } from "../types";
+import { adjustCanvasSizeAndScale } from "../utility";
 
 export async function generateBackgroundLayer(CONFIG: Config) {
 

@@ -1,5 +1,5 @@
-import type { Config, Coord } from "./types";
-import { adjustCanvasSizeAndScale } from "./utility";
+import type { Config, Coord } from "../types";
+import { adjustCanvasSizeAndScale } from "../utility";
 
 
 export function generateGridCanvasLayer(CONFIG: Config) {

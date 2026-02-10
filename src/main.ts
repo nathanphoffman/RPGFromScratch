@@ -3,10 +3,10 @@
 //import viteLogo from '/vite.svg'
 //import { setupCounter } from './counter.ts'
 
-import { generateBackgroundLayer } from "./background";
-import { generadeDoodadsLayer } from "./doodads";
-import { generateGridCanvasLayer } from "./grid";
-import { generatePlayerCanvasLayer } from "./player";
+import { generateBackgroundLayer } from "./layers/background";
+import { generadeDoodadsLayer } from "./layers/doodads";
+import { generateGridCanvasLayer } from "./layers/grid";
+import { generatePlayerCanvasLayer } from "./layers/player";
 import { playMusic } from "./sound";
 
 import type { Config } from "./types";
@@ -15,8 +15,8 @@ import type { Config } from "./types";
 
   const CONFIG: Config = {
     SIZE: 64,
-    WIDTH: Math.floor(64 * 16),
-    HEIGHT: Math.floor(64 * 12),
+    WIDTH: Math.floor(64 * 14),
+    HEIGHT: Math.floor(64 * 10),
     SCALE: 1
   }
 
