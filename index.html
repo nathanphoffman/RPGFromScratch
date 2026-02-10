@@ -29,7 +29,7 @@
       position: absolute;
       top: 660px;
       left: 10px;
-      width: 876px;
+      width: 720px;
       height: 150px;
     }
 
@@ -45,6 +45,12 @@
       font-size: 18pt;
     }
 
+    img.stone {
+      position: absolute;
+      top: 640px;
+      left: 720px;
+    }
+
   </style>
   <!--<script type="module" src="/src/main.ts"></script>-->
 </head>
@@ -52,7 +58,7 @@
 <body>
   <audio id="audio" src="music/battle.mp3"></audio>
   
-  <h3>An RPG From Scratch</h3>
+  <h3>An RPG From Scratch <sub>By: Nathan Hoffman</sub></h3>
 
   <div id="game">
     <div>
@@ -63,6 +69,7 @@
     </div>
 
     <div id="terminal"></div>
+    <img class="stone" src="stone.png"/>
   </div>
 
   <script type="module" src="/src/main.ts"></script>
