@@ -11,6 +11,7 @@ export type Config = {
 
 export type XAxis = number;
 export type YAxis = number;
+export type Axis = "x" | "y";
 
 export type Coord = [XAxis, YAxis];
 
@@ -19,3 +20,9 @@ export type Direction = {
 }
 
 export type TerminalHook = (heading: string)=>void;
+
+export type Player = {
+    x: number,
+    y: number,
+    size: 64
+}

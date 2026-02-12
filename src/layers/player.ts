@@ -1,8 +1,7 @@
 import { selectEvent } from "../events";
-import { playMusic } from "../sound";
 import { loadSpriteImage } from "../sprite";
-import type { Config, Coord, Direction, TerminalHook } from "../types";
-import { adjustCanvasSizeAndScale, clearCanvas, futureCollisionOnAxis, getPositionOfClick } from "../utility";
+import type { Axis, Config, Coord, Direction, Player } from "../types";
+import { adjustCanvasSizeAndScale, futureCollisionOnAxis } from "../utility";
 
 export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: any) {
 
@@ -17,32 +16,21 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
 
     adjustCanvasSizeAndScale(canvas, CONFIG);
 
-    let player = {
+    let player : Player = {
         x: canvas.width / 2,
         y: canvas.height / 2,
-        size: SIZE,
-        color: 'blue'
+        size: SIZE
     };
 
     let currentMoveTo: Coord = [player.x, player.y];
 
     selectEvent("CLICK").onEvent(({ clickAt }: any) => {
-        //playMusic();
 
         currentMoveTo = undoMoveToOffset(clickAt, CONFIG);
 
-        // we must notify the terminal if the player clicks 
         const { headingPrefix } = getHeading(currentMoveTo, player, CONFIG);
-        //terminalHook(headingPrefix);
-
         selectEvent("MOVE").executeEvent({ headingPrefix, currentMoveTo });
-
-        setTimeout(() => {
-            const term = document.getElementsByClassName("xt")[0];
-            term?.focus();
-        }, 10);
-
-    })
+    });
 
 
     const ctx = canvas.getContext('2d');
@@ -50,54 +38,17 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
 
     const img = await loadSpriteImage("rogues-64.png", 2, 2, CONFIG);
 
-
-    let pastMoveTo: Coord = [0, 0];
-    function moveChanged() {
-        if (pastMoveTo[0] !== currentMoveTo[0] || pastMoveTo[1] !== currentMoveTo[1]) {
-            pastMoveTo = [...currentMoveTo];
-            return true;
-        }
-    }
-
-    let pastPosition: Coord = [0, 0];
-    function positionChanged() {
-
-        const currentPosition = [player.x, player.y];
-
-        if (pastPosition[0] !== currentPosition[0] || pastPosition[1] !== currentPosition[1]) {
-            pastPosition = [...currentPosition];
-            return true;
-        }
-    }
-
-    //ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas 
-    //drawPlayer(player, ctx, img);
-
     selectEvent("NEXT_FRAME").onEvent(() => {
         if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas  
 
-        if (currentMoveTo.length > 0) moveToCurrent(collisionMap, currentMoveTo, player, CONFIG);
-        if (currentMoveTo && currentMoveTo.length) drawMoveTo(currentMoveTo, ctx, CONFIG);
-
-        if (currentMoveTo && positionChanged()) {
-            console.log("hit");
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas  
-
+        if (currentMoveTo.length > 0) { 
+            moveToCurrent(collisionMap, currentMoveTo, player, CONFIG);
             drawPlayer(player, ctx, img);
             drawMoveTo(currentMoveTo, ctx, CONFIG);
         }
+        else drawPlayer(player, ctx, img);
 
-        //clearCanvas(ctx, CONFIG);
-        //if (currentMoveTo.length > 0) moveToCurrent(collisionMap, currentMoveTo, player, CONFIG);
-        //if (currentMoveTo && currentMoveTo.length) drawMoveTo(currentMoveTo, ctx, CONFIG);
-        //drawPlayer(player, ctx, img);
-
-        drawPlayer(player, ctx, img);
-
-        //if (currentMoveTo && currentMoveTo.length && moveChanged()) drawMoveTo(currentMoveTo, ctx, CONFIG);
-        // Update position
-        //if (x < targetX) x += 2; // Move towards target
-        //requestAnimationFrame(animate); // Call next frame
     });
 
 }
@@ -157,8 +108,6 @@ function getHeading(currentMoveTo: Coord, player: any, CONFIG: Config) {
         east: x1 + MOVE_ERROR < x2
     }
 
-    //console.log(isHeaded);
-
     const headingVertical = isHeaded.south || isHeaded.north;
     const headingHorizontal = isHeaded.east || isHeaded.west;
 
@@ -176,13 +125,14 @@ function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any,
 
     const { headingVertical, headingHorizontal, isHeaded } = getHeading(currentMoveTo, player, CONFIG);
 
+    // the movement is always equal to the size of the squares on the grid to lock the player in place
     const MOVE_AMOUNT = CONFIG.SIZE;
 
-    const move = (axis: "x" | "y", amount: number) => {
+    const move = (axis: Axis, amount: number) => {
 
         const collisionDetected = collisionMap.find(coord => {
 
-            // opposite of the moving axis:
+            // the static axis is the axis the player is not moving on (opposite from the player)
             const staticAxis = axis === "x" ? "y" : "x";
 
             const collisionOnMovingAxis = futureCollisionOnAxis(amount, player, coord, axis, CONFIG);
@@ -195,7 +145,7 @@ function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any,
         return () => player[axis] += amount;
     }
 
-    const moveTo: direction = {
+    const moveTo: Direction = {
         west: move("x", -MOVE_AMOUNT),
         east: move("x", +MOVE_AMOUNT),
         south: move("y", +MOVE_AMOUNT),

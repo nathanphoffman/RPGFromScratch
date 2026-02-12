@@ -9,8 +9,8 @@ import { generateBackgroundLayer } from "./layers/background";
 import { generadeDoodadsLayer } from "./layers/doodads";
 import { generateGridCanvasLayer } from "./layers/grid";
 import { generatePlayerCanvasLayer } from "./layers/player";
-import { playMusic } from "./sound";
 import { startTerminal } from "./terminal";
+import { setupMusicPlayer } from "./sound";
 
 import type { Config } from "./types";
 
@@ -29,13 +29,16 @@ import type { Config } from "./types";
   // the grid canvas lays on top as a chessboard as the highest z-index it also tracks click events
   generateGridCanvasLayer(CONFIG);
 
-
-
+  // all the background layer does is display a flat color or texture
   await generateBackgroundLayer(CONFIG);
-  const collisionMap = await generadeDoodadsLayer(CONFIG);
-  const playerLoop = await generatePlayerCanvasLayer(CONFIG, collisionMap);
 
-  //playMusic();
+  // doodads is all of the visual details outside of the creatures like grass, trees, houses
+  const collisionMap = await generadeDoodadsLayer(CONFIG);
+
+  // the player layer is where all of the movement is configured and rendered for the player character(s)
+  await generatePlayerCanvasLayer(CONFIG, collisionMap);
+
+  setupMusicPlayer();
 
   // once all assets are loaded we start the game
   const gameLoop = () => {

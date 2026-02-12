@@ -10,13 +10,23 @@ type tailwind_styles = typeof TAILWIND_STYLES[number];
 const term = new XTerminal();
 
 export function startTerminal() {
+
     term.mount("#terminal");
+    const terminalElement = document.getElementsByClassName("xt")[0];
+
     term.write("Hello World!\n");
     //term.clear();
 
-    selectEvent("MOVE").onEvent(({headingPrefix, currentMoveTo}: any)=>{
+    selectEvent("MOVE").onEvent(({ headingPrefix, currentMoveTo }: any) => {
         console.log("Moved to", headingPrefix, currentMoveTo)
     });
+
+    selectEvent("CLICK").onEvent(() => {
+        setTimeout(() => {
+            // clicks are made on the canvas which takes focus away from the terminal, here we restore it
+            terminalElement?.focus();
+        }, 10);
+    })
 
     writeLine(
         description("It is raining outside, rain pelts the roof of the tavern."),
@@ -31,7 +41,7 @@ export function startTerminal() {
 
         if (response.ok) {
             const pyCode = await response.text();
-            
+
             console.log(pyCode);
 
             const output = pyodide.runPython(`${pyCode}`);
