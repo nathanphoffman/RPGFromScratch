@@ -1,9 +1,10 @@
+import { selectEvent } from "../events";
 import { playMusic } from "../sound";
 import { loadSpriteImage } from "../sprite";
 import type { Config, Coord, Direction, TerminalHook } from "../types";
 import { adjustCanvasSizeAndScale, clearCanvas, futureCollisionOnAxis, getPositionOfClick } from "../utility";
 
-export async function generatePlayerCanvasLayer(CONFIG: Config, gridCanvas: HTMLCanvasElement) {
+export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: any) {
 
     const { SIZE } = CONFIG;
 
@@ -25,49 +26,80 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, gridCanvas: HTML
 
     let currentMoveTo: Coord = [player.x, player.y];
 
-    gridCanvas.addEventListener('click', (e) => {
-
+    selectEvent("CLICK").onEvent(({ clickAt }: any) => {
         //playMusic();
 
-        currentMoveTo = getPositionOfClick(canvas, e)
-        currentMoveTo = undoMoveToOffset(currentMoveTo, CONFIG);
+        currentMoveTo = undoMoveToOffset(clickAt, CONFIG);
 
         // we must notify the terminal if the player clicks 
         const { headingPrefix } = getHeading(currentMoveTo, player, CONFIG);
         //terminalHook(headingPrefix);
+
+        selectEvent("MOVE").executeEvent({ headingPrefix, currentMoveTo });
 
         setTimeout(() => {
             const term = document.getElementsByClassName("xt")[0];
             term?.focus();
         }, 10);
 
-    });
+    })
 
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const img = await loadSpriteImage("rogues-64.png", 2, 2, CONFIG);
 
-    function animate() {
-        if (!ctx) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas  
-        drawPlayer(player, ctx, img);
-        if (currentMoveTo && currentMoveTo.length) drawMoveTo(currentMoveTo, ctx, CONFIG);
-        // Update position
-        //if (x < targetX) x += 2; // Move towards target
-        requestAnimationFrame(animate); // Call next frame
+
+    let pastMoveTo: Coord = [0, 0];
+    function moveChanged() {
+        if (pastMoveTo[0] !== currentMoveTo[0] || pastMoveTo[1] !== currentMoveTo[1]) {
+            pastMoveTo = [...currentMoveTo];
+            return true;
+        }
     }
 
-    animate();
+    let pastPosition: Coord = [0, 0];
+    function positionChanged() {
 
-    // loop for the game engine
-    return (collisionMap: Coord[]) => {
-        clearCanvas(ctx, CONFIG);
+        const currentPosition = [player.x, player.y];
+
+        if (pastPosition[0] !== currentPosition[0] || pastPosition[1] !== currentPosition[1]) {
+            pastPosition = [...currentPosition];
+            return true;
+        }
+    }
+
+    //ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas 
+    //drawPlayer(player, ctx, img);
+
+    selectEvent("NEXT_FRAME").onEvent(() => {
+        if (!ctx) return;
+
         if (currentMoveTo.length > 0) moveToCurrent(collisionMap, currentMoveTo, player, CONFIG);
         if (currentMoveTo && currentMoveTo.length) drawMoveTo(currentMoveTo, ctx, CONFIG);
+
+        if (currentMoveTo && positionChanged()) {
+            console.log("hit");
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas  
+
+            drawPlayer(player, ctx, img);
+            drawMoveTo(currentMoveTo, ctx, CONFIG);
+        }
+
+        //clearCanvas(ctx, CONFIG);
+        //if (currentMoveTo.length > 0) moveToCurrent(collisionMap, currentMoveTo, player, CONFIG);
+        //if (currentMoveTo && currentMoveTo.length) drawMoveTo(currentMoveTo, ctx, CONFIG);
         //drawPlayer(player, ctx, img);
-    };
+
+        drawPlayer(player, ctx, img);
+
+        //if (currentMoveTo && currentMoveTo.length && moveChanged()) drawMoveTo(currentMoveTo, ctx, CONFIG);
+        // Update position
+        //if (x < targetX) x += 2; // Move towards target
+        //requestAnimationFrame(animate); // Call next frame
+    });
+
 }
 
 function undoMoveToOffset(currentMoveTo: Coord, CONFIG: Config): Coord {
@@ -115,12 +147,12 @@ function getHeading(currentMoveTo: Coord, player: any, CONFIG: Config) {
     const [x2, y2] = currentMoveTo;
     const MOVE_ERROR = SIZE / 2;
 
-      const isHeaded: Direction = {
+    const isHeaded: Direction = {
 
         // keep north/south here so they come first in prefix generation
         north: y1 - MOVE_ERROR > y2,
         south: y1 + MOVE_ERROR < y2,
-        
+
         west: x1 - MOVE_ERROR > x2,
         east: x1 + MOVE_ERROR < x2
     }
@@ -130,19 +162,19 @@ function getHeading(currentMoveTo: Coord, player: any, CONFIG: Config) {
     const headingVertical = isHeaded.south || isHeaded.north;
     const headingHorizontal = isHeaded.east || isHeaded.west;
 
-    const headingPrefix = Object.keys(isHeaded).reduce((prefix, heading, idx) =>{
-        if(isHeaded[heading]) return prefix + String(heading)[0].toUpperCase();
+    const headingPrefix = Object.keys(isHeaded).reduce((prefix, heading, idx) => {
+        if (isHeaded[heading]) return prefix + String(heading)[0].toUpperCase();
         else return prefix;
-    },"");
+    }, "");
 
-    return { headingPrefix, headingVertical, headingHorizontal, isHeaded};
+    return { headingPrefix, headingVertical, headingHorizontal, isHeaded };
 
 }
 
 function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any, CONFIG: Config) {
 
 
-    const { headingVertical, headingHorizontal, isHeaded} = getHeading(currentMoveTo, player, CONFIG);
+    const { headingVertical, headingHorizontal, isHeaded } = getHeading(currentMoveTo, player, CONFIG);
 
     const MOVE_AMOUNT = CONFIG.SIZE;
 

@@ -1,4 +1,5 @@
 import XTerminal from 'xterminal';
+import { selectEvent } from './events';
 
 declare global {
     var loadPyodide: any
@@ -12,6 +13,10 @@ export function startTerminal() {
     term.mount("#terminal");
     term.write("Hello World!\n");
     //term.clear();
+
+    selectEvent("MOVE").onEvent(({headingPrefix, currentMoveTo}: any)=>{
+        console.log("Moved to", headingPrefix, currentMoveTo)
+    });
 
     writeLine(
         description("It is raining outside, rain pelts the roof of the tavern."),

@@ -4,6 +4,7 @@
 //import { setupCounter } from './counter.ts'
 
 import { setupCursor } from "./cursor";
+import { selectEvent } from "./events";
 import { generateBackgroundLayer } from "./layers/background";
 import { generadeDoodadsLayer } from "./layers/doodads";
 import { generateGridCanvasLayer } from "./layers/grid";
@@ -25,19 +26,23 @@ import type { Config } from "./types";
   startTerminal();
   setupCursor();
 
-  // the grid canvas lays on top so we attach even listeners to it
-  const gridCanvas = generateGridCanvasLayer(CONFIG);
-  if (!gridCanvas) throw "Grid canvas not generated";
-  const playerLoop = await generatePlayerCanvasLayer(CONFIG, gridCanvas);
+  // the grid canvas lays on top as a chessboard as the highest z-index it also tracks click events
+  generateGridCanvasLayer(CONFIG);
+
+
 
   await generateBackgroundLayer(CONFIG);
   const collisionMap = await generadeDoodadsLayer(CONFIG);
+  const playerLoop = await generatePlayerCanvasLayer(CONFIG, collisionMap);
 
   //playMusic();
 
   // once all assets are loaded we start the game
   const gameLoop = () => {
-    if (playerLoop) playerLoop(collisionMap);
+    //if (playerLoop) playerLoop(collisionMap);
+
+    // broadcasts to all logic to update
+    selectEvent("NEXT_FRAME").executeEvent({});
 
     // start the game at approximately 4fps
     requestAnimationFrame(() => setTimeout(gameLoop, 250));

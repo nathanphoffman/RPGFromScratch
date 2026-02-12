@@ -1,5 +1,6 @@
+import { selectEvent } from "../events";
 import type { Config, Coord } from "../types";
-import { adjustCanvasSizeAndScale } from "../utility";
+import { adjustCanvasSizeAndScale, getPositionOfClick } from "../utility";
 
 
 export function generateGridCanvasLayer(CONFIG: Config) {
@@ -42,6 +43,13 @@ export function generateGridCanvasLayer(CONFIG: Config) {
     [...new Array(numberOfRows)].forEach((_, i) => drawLine([0, (i + 1) * SIZE], [WIDTH, (i + 1) * SIZE]));
     [...new Array(numberOfColumns)].forEach((_, i) => drawLine([(i + 1) * SIZE, 0], [(i + 1) * SIZE, HEIGHT]));
 
-    return canvas;
+    canvas.addEventListener('click', (e) => {
+
+        //playMusic();
+
+        const clickAt = getPositionOfClick(canvas, e);
+        selectEvent("CLICK").executeEvent({clickAt});
+
+    });
 
 }

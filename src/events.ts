@@ -1,6 +1,6 @@
 
 
-const EVENTS = ["MOVE"] as const;
+const EVENTS = ["MOVE", "CLICK", "NEXT_FRAME"] as const;
 type EventName = typeof EVENTS[number];
 
 type Listener<T extends object> = (signature: T) => void;
@@ -8,12 +8,12 @@ type EventRegistry = {[key in EventName]?: [Listener<object>]};
 
 let EVENT_REGISTRY : EventRegistry = {};
 
-export function event(eventName: EventName) {
+export function selectEvent(eventName: EventName) {
 
     const event = Object.keys(EVENT_REGISTRY).find((_eventName)=>_eventName === eventName);
 
     return {
-        on(listener: Listener<object>) {
+        onEvent(listener: Listener<object>) {
 
             if(!event) {
                 EVENT_REGISTRY[eventName] = [listener];
@@ -27,7 +27,7 @@ export function event(eventName: EventName) {
             if(!event) throw `Event ${event} is not being listened to`;
 
             const events = EVENT_REGISTRY[event as EventName];
-            events?.forEach(event=>event(obj))
+            events?.forEach(event=>setTimeout(()=>event(obj),1));
         }
     }
 }
