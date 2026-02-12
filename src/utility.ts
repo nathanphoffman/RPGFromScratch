@@ -43,6 +43,7 @@ export function futureCollisionOnAxis(moveAmount: number, player: any, coord: Co
 }
 
 
+
 /*
 export function memoize(obj: any, ) {
     Object.keys.find((key)=>{

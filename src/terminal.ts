@@ -22,7 +22,7 @@ export function startTerminal() {
     (async () => {
         let pyodide = await loadPyodide();
 
-        const response = await fetch("movement.py");
+        const response = await fetch("terminal/movement.py");
 
         if (response.ok) {
             const pyCode = await response.text();
