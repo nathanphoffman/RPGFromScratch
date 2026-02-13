@@ -22,7 +22,7 @@ export function startTerminal() {
     });
 
     selectEvent("NO_MOVE").onEvent(({}: any) => {
-        console.log("Move is invalid")
+        writeLine("\n\nThe move you made is not valid.\n");
     });
 
     selectEvent("CLICK").onEvent(() => {

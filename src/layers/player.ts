@@ -49,8 +49,11 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
             drawPlayer(player, ctx, img);
             //console.log(status);
 
-            if (status === "NO_MOVE") {
+            const currentMoveIsNotWherePlayerIs = currentMoveTo[0] !== player.x || currentMoveTo[1] !== player.y;
+
+            if (status === "NO_MOVE" && currentMoveIsNotWherePlayerIs) {
                 selectEvent("NO_MOVE").executeEvent({});
+                drawErrorTo(currentMoveTo, ctx, CONFIG);
                 currentMoveTo = [player.x, player.y];
             }
             else drawMoveTo(currentMoveTo, ctx, CONFIG);
@@ -90,9 +93,26 @@ function drawMoveTo(currentMoveTo: Coord, ctx: CanvasRenderingContext2D, CONFIG:
     const { SIZE } = CONFIG;
     //ctx.fillStyle = "blue";
     ctx.beginPath();
-
+    ctx.strokeStyle = "tan";
     // we have to center on the square by taking 0.5 the size of a 64 space
     ctx.rect(Math.ceil(currentMoveTo[0] / SIZE - 0.5) * SIZE, Math.ceil(currentMoveTo[1] / SIZE - 0.5) * SIZE, SIZE, SIZE);
+    ctx.stroke();
+}
+
+function drawErrorTo(currentMoveTo: Coord, ctx: CanvasRenderingContext2D, CONFIG: Config) {
+
+    //console.log("currentmoveto is", currentMoveTo);
+
+    const { SIZE } = CONFIG;
+
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+    ctx.strokeStyle = "red";
+    //ctx.lineWidth = 10;
+    
+    // we have to center on the square by taking 0.5 the size of a 64 space
+    ctx.rect(Math.ceil(currentMoveTo[0] / SIZE - 0.5) * SIZE, Math.ceil(currentMoveTo[1] / SIZE - 0.5) * SIZE, SIZE, SIZE);
+    ctx.fill();
     ctx.stroke();
 }
 
@@ -184,13 +204,10 @@ function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any,
         if (moveHorizontal) {
             if (isHeaded.west) return moveTo.west();
             else if (isHeaded.east) return moveTo.east();
-            else return "NO_MOVE";
         }
         else {
             if (isHeaded.south) return moveTo.south();
             else if (isHeaded.north) return moveTo.north();
-            
-            else return "NO_MOVE";
         }
     }
     else {
@@ -199,17 +216,14 @@ function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any,
 
         const selectedDirection = Object.keys(isHeaded).find(direction => {
             if (!!isHeaded[direction]) {
-                console.log(direction);
-                console.log("I ran")
                 return direction;
             }
         });
 
-        
         if (selectedDirection && moveTo[selectedDirection]) {
             console.log(moveTo[selectedDirection]);
             return moveTo[selectedDirection]();
-        } else return "NO_MOVE";
+        } else return undefined;
         
     }
 
