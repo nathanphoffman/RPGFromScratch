@@ -27,7 +27,7 @@ export function selectEvent(eventName: EventName) {
             if(!event) throw `Event ${event} is not being listened to`;
 
             const events = EVENT_REGISTRY[event as EventName];
-            events?.forEach(event=>setTimeout(()=>event(obj),1));
+            setTimeout(()=>events?.forEach(event=>event(obj)),1);
         }
     }
 }

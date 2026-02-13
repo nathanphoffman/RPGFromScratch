@@ -16,7 +16,7 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
 
     adjustCanvasSizeAndScale(canvas, CONFIG);
 
-    let player : Player = {
+    let player: Player = {
         x: canvas.width / 2,
         y: canvas.height / 2,
         size: SIZE
@@ -28,7 +28,7 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
         currentMoveTo = undoMoveToOffset(clickAt, CONFIG);
         const { headingPrefix } = getHeading(currentMoveTo, player, CONFIG);
 
-        if(currentMoveTo.length > 0) {
+        if (currentMoveTo.length > 0) {
             selectEvent("MOVE").executeEvent({ headingPrefix, currentMoveTo });
         }
     });
@@ -43,20 +43,17 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
         if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas  
 
-        if (currentMoveTo.length > 0) { 
+        if (currentMoveTo.length > 0) {
             const status = moveToCurrent(collisionMap, currentMoveTo, player, CONFIG);
 
             drawPlayer(player, ctx, img);
             //console.log(status);
 
-            if(currentMoveTo) {
-                if(status === "NO_MOVE") {
-                    console.log("no move");
-                    selectEvent("NO_MOVE").executeEvent({});
-                    currentMoveTo = [player.x,player.y];
-                }
-                else drawMoveTo(currentMoveTo, ctx, CONFIG);
+            if (status === "NO_MOVE") {
+                selectEvent("NO_MOVE").executeEvent({});
+                currentMoveTo = [player.x, player.y];
             }
+            else drawMoveTo(currentMoveTo, ctx, CONFIG);
         }
         else drawPlayer(player, ctx, img);
 
@@ -131,9 +128,10 @@ function getHeading(currentMoveTo: Coord, player: any, CONFIG: Config) {
 
 }
 
-function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any, CONFIG: Config): void | "NO_MOVE" {
+function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any, CONFIG: Config, diagonalRetry: boolean = false): void | "NO_MOVE" {
 
     const { headingVertical, headingHorizontal, isHeaded } = getHeading(currentMoveTo, player, CONFIG);
+    const headingDiagonal = headingHorizontal && headingVertical;
 
     // the movement is always equal to the size of the squares on the grid to lock the player in place
     const MOVE_AMOUNT = CONFIG.SIZE;
@@ -151,52 +149,68 @@ function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any,
             return collisionOnStaticAxis && collisionOnMovingAxis;
         });
 
-        if (!!collisionDetected) {
-            console.log("collision");
-            return () => "NO_MOVE";
-        }
+        if (collisionDetected) {
 
-        return () => player[axis] += amount;
+            // diagonals are chosen nback and forth for movement but sometimes choosing a different diagonal will free
+            // collisions and allow for movement, like moving around a tree.  This retrys the pathing which by definition will
+            // try another diagonal, a bit of a hack but an elegant solution nonetheless
+
+            if(headingDiagonal && !diagonalRetry) return ()=>moveToCurrent(collisionMap, currentMoveTo, player, CONFIG, true);
+            else return () => "NO_MOVE";
+        }
+        //else if (!axis) return () => "NO_MOVE";
+        else return () => player[axis] += amount;
     }
-/*
-  const collideWith: Direction = {
-        west: collision("x", -MOVE_AMOUNT),
-        east: collision("x", +MOVE_AMOUNT),
-        south: collision("y", +MOVE_AMOUNT),
-        north: collision("y", -MOVE_AMOUNT)
-    }
-*/
+    /*
+      const collideWith: Direction = {
+            west: collision("x", -MOVE_AMOUNT),
+            east: collision("x", +MOVE_AMOUNT),
+            south: collision("y", +MOVE_AMOUNT),
+            north: collision("y", -MOVE_AMOUNT)
+        }
+    */
     const moveTo: Direction = {
+        north: move("y", -MOVE_AMOUNT),
+        south: move("y", +MOVE_AMOUNT),
         west: move("x", -MOVE_AMOUNT),
         east: move("x", +MOVE_AMOUNT),
-        south: move("y", +MOVE_AMOUNT),
-        north: move("y", -MOVE_AMOUNT)
     }
 
-    //console.log(moveTo);
+    if (headingDiagonal) {
 
-    // if no move is suggested, there was a collision or some other issue
-    if (headingHorizontal && headingVertical) {
+
         const moveHorizontal = flipFlop = !flipFlop;
 
         if (moveHorizontal) {
             if (isHeaded.west) return moveTo.west();
             else if (isHeaded.east) return moveTo.east();
+            else return "NO_MOVE";
         }
         else {
             if (isHeaded.south) return moveTo.south();
             else if (isHeaded.north) return moveTo.north();
+            
+            else return "NO_MOVE";
         }
     }
     else {
         // only 1 move is relevant in this scenario the find exits early on truthy,
         // we just need to find which direction is truthy which is the purpose of the find loop
-        Object.keys(isHeaded).find(direction => {
-            if (isHeaded[direction]) {
-                return moveTo[direction]();
+
+        const selectedDirection = Object.keys(isHeaded).find(direction => {
+            if (!!isHeaded[direction]) {
+                console.log(direction);
+                console.log("I ran")
+                return direction;
             }
-            //else return "NO_MOVE";
         });
+
+        
+        if (selectedDirection && moveTo[selectedDirection]) {
+            console.log(moveTo[selectedDirection]);
+            return moveTo[selectedDirection]();
+        } else return "NO_MOVE";
+        
     }
 
 }

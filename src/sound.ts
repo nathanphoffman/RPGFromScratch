@@ -4,7 +4,7 @@ import { selectEvent } from "./events";
 let currentAudio : HTMLAudioElement | undefined = undefined;
 
 const music: string[] = [
-    "battle.mp3",
+    //"battle.mp3",
     "dungeon.mp3"
 ];
 

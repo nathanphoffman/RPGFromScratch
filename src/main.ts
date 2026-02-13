@@ -41,7 +41,7 @@ import { startRain } from "./atmosphere/rain";
 
   setupMusicPlayer();
 
-  startRain();
+  //startRain();
 
   // once all assets are loaded we start the game
   const gameLoop = () => {
