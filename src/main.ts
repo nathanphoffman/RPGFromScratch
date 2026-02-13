@@ -13,6 +13,7 @@ import { startTerminal } from "./terminal";
 import { setupMusicPlayer } from "./sound";
 
 import type { Config } from "./types";
+import { startRain } from "./atmosphere/rain";
 
 (async () => {
 
@@ -39,6 +40,8 @@ import type { Config } from "./types";
   await generatePlayerCanvasLayer(CONFIG, collisionMap);
 
   setupMusicPlayer();
+
+  startRain();
 
   // once all assets are loaded we start the game
   const gameLoop = () => {

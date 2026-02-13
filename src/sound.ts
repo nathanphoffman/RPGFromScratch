@@ -8,6 +8,10 @@ const music: string[] = [
     "dungeon.mp3"
 ];
 
+const effects: string[] = [
+    "rain.mp3"
+];
+
 function getRandomSong() {
     const songPick = Math.ceil(Math.random() * music.length) - 1;
     return music[songPick];
