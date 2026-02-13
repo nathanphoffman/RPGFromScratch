@@ -1,6 +1,6 @@
 
 
-const EVENTS = ["MOVE", "CLICK", "NEXT_FRAME"] as const;
+const EVENTS = ["MOVE", "CLICK", "NEXT_FRAME", "NO_MOVE"] as const;
 type EventName = typeof EVENTS[number];
 
 type Listener<T extends object> = (signature: T) => void;

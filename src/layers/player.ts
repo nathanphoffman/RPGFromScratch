@@ -25,11 +25,12 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
     let currentMoveTo: Coord = [player.x, player.y];
 
     selectEvent("CLICK").onEvent(({ clickAt }: any) => {
-
         currentMoveTo = undoMoveToOffset(clickAt, CONFIG);
-
         const { headingPrefix } = getHeading(currentMoveTo, player, CONFIG);
-        selectEvent("MOVE").executeEvent({ headingPrefix, currentMoveTo });
+
+        if(currentMoveTo.length > 0) {
+            selectEvent("MOVE").executeEvent({ headingPrefix, currentMoveTo });
+        }
     });
 
 
@@ -43,9 +44,19 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
         ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas  
 
         if (currentMoveTo.length > 0) { 
-            moveToCurrent(collisionMap, currentMoveTo, player, CONFIG);
+            const status = moveToCurrent(collisionMap, currentMoveTo, player, CONFIG);
+
             drawPlayer(player, ctx, img);
-            drawMoveTo(currentMoveTo, ctx, CONFIG);
+            //console.log(status);
+
+            if(currentMoveTo) {
+                if(status === "NO_MOVE") {
+                    console.log("no move");
+                    selectEvent("NO_MOVE").executeEvent({});
+                    currentMoveTo = [player.x,player.y];
+                }
+                else drawMoveTo(currentMoveTo, ctx, CONFIG);
+            }
         }
         else drawPlayer(player, ctx, img);
 
@@ -120,8 +131,7 @@ function getHeading(currentMoveTo: Coord, player: any, CONFIG: Config) {
 
 }
 
-function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any, CONFIG: Config) {
-
+function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any, CONFIG: Config): void | "NO_MOVE" {
 
     const { headingVertical, headingHorizontal, isHeaded } = getHeading(currentMoveTo, player, CONFIG);
 
@@ -141,10 +151,21 @@ function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any,
             return collisionOnStaticAxis && collisionOnMovingAxis;
         });
 
-        if (collisionDetected) return () => 0;
+        if (!!collisionDetected) {
+            console.log("collision");
+            return () => "NO_MOVE";
+        }
+
         return () => player[axis] += amount;
     }
-
+/*
+  const collideWith: Direction = {
+        west: collision("x", -MOVE_AMOUNT),
+        east: collision("x", +MOVE_AMOUNT),
+        south: collision("y", +MOVE_AMOUNT),
+        north: collision("y", -MOVE_AMOUNT)
+    }
+*/
     const moveTo: Direction = {
         west: move("x", -MOVE_AMOUNT),
         east: move("x", +MOVE_AMOUNT),
@@ -152,16 +173,19 @@ function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any,
         north: move("y", -MOVE_AMOUNT)
     }
 
+    //console.log(moveTo);
+
+    // if no move is suggested, there was a collision or some other issue
     if (headingHorizontal && headingVertical) {
         const moveHorizontal = flipFlop = !flipFlop;
 
         if (moveHorizontal) {
-            if (isHeaded.west) moveTo.west();
-            else if (isHeaded.east) moveTo.east();
+            if (isHeaded.west) return moveTo.west();
+            else if (isHeaded.east) return moveTo.east();
         }
         else {
-            if (isHeaded.south) moveTo.south();
-            else if (isHeaded.north) moveTo.north();
+            if (isHeaded.south) return moveTo.south();
+            else if (isHeaded.north) return moveTo.north();
         }
     }
     else {
@@ -169,10 +193,9 @@ function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any,
         // we just need to find which direction is truthy which is the purpose of the find loop
         Object.keys(isHeaded).find(direction => {
             if (isHeaded[direction]) {
-                moveTo[direction]();
-                return true;
+                return moveTo[direction]();
             }
-            else return false;
+            //else return "NO_MOVE";
         });
     }
 

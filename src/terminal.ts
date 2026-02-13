@@ -21,6 +21,10 @@ export function startTerminal() {
         console.log("Moved to", headingPrefix, currentMoveTo)
     });
 
+    selectEvent("NO_MOVE").onEvent(({}: any) => {
+        console.log("Move is invalid")
+    });
+
     selectEvent("CLICK").onEvent(() => {
         setTimeout(() => {
             // clicks are made on the canvas which takes focus away from the terminal, here we restore it
