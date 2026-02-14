@@ -72,11 +72,10 @@ function undoMoveToOffset(currentMoveTo: Coord, CONFIG: Config): Coord {
     return [x - SIZE / 2, y - SIZE / 2]
 }
 
-function drawPlayer(player, ctx: CanvasRenderingContext2D, img: any) {
+function drawPlayer(player: Player, ctx: CanvasRenderingContext2D, img: any) {
 
-    const { x, y, size, color } = player;
-    ctx.fillStyle = color;
-
+    const { x, y, size } = player;
+    
     // player is a square so both sizes for x and y scale are equal
 
     ctx.beginPath();

@@ -4,8 +4,6 @@ import { adjustCanvasSizeAndScale } from "../utility";
 
 export async function generadeDoodadsLayer(CONFIG: Config) {
 
-    const { WIDTH, HEIGHT, SIZE } = CONFIG;
-
     const canvas = document.getElementById('doodads') as HTMLCanvasElement;
     adjustCanvasSizeAndScale(canvas, CONFIG);
     
@@ -54,7 +52,7 @@ async function spriteSheetFn(ctx: CanvasRenderingContext2D, sheet: string, CONFI
 
     const spriteSheet = await loadSpriteSheet(sheet);
 
-    return (sheetX, sheetY, collision: boolean = false)=> async (x,y) =>{
+    return (sheetX: number, sheetY: number, collision: boolean = false)=> async (x: number, y: number) => {
         if(collision) collisionMap.push([x,y])
         const img = await loadSpriteFromSheet(spriteSheet, sheetX, sheetY, CONFIG);
         ctx.drawImage(img as any, SIZE * x, SIZE * y, SIZE, SIZE);

@@ -1,3 +1,6 @@
+import type { Config } from "../types";
+import { adjustCanvasSizeAndScale } from "../utility";
+
 export async function generateFogLayer(CONFIG: Config) {
 
     const { WIDTH, HEIGHT, SIZE } = CONFIG;
