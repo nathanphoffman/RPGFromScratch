@@ -7,11 +7,11 @@ const music: string[] = [
     //"battle.mp3",
     "dungeon.mp3"
 ];
-
+/*
 const effects: string[] = [
     "rain.mp3"
 ];
-
+*/
 function getRandomSong() {
     const songPick = Math.ceil(Math.random() * music.length) - 1;
     return music[songPick];
@@ -46,7 +46,7 @@ function pokeMusicPlayer() {
 export function setupMusicPlayer() {
 
     // because of browser permissions, the music player is unable to play anything without a user event initiating it
-    selectEvent("CLICK").onEvent(({ clickAt }: any) => {
+    selectEvent("CLICK").onEvent(() => {
         pokeMusicPlayer();
     });
 

@@ -1,4 +1,4 @@
-import { selectEvent } from "../events";
+import { selectEvent, type MoveEvent } from "../events";
 import { loadSpriteImage } from "../sprite";
 import type { Axis, Config, Coord, Direction, Player } from "../types";
 import { adjustCanvasSizeAndScale, futureCollisionOnAxis } from "../utility";
@@ -24,12 +24,14 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
 
     let currentMoveTo: Coord = [player.x, player.y];
 
+    const moveEvent = selectEvent<MoveEvent>("MOVE");
+
     selectEvent("CLICK").onEvent(({ clickAt }: any) => {
         currentMoveTo = undoMoveToOffset(clickAt, CONFIG);
         const { headingPrefix } = getHeading(currentMoveTo, player, CONFIG);
 
         if (currentMoveTo.length > 0) {
-            selectEvent("MOVE").executeEvent({ headingPrefix, currentMoveTo });
+            moveEvent.executeEvent({ headingPrefix, currentMoveTo, player });
         }
     });
 
@@ -38,6 +40,8 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
     if (!ctx) return;
 
     const img = await loadSpriteImage("rogues-64.png", 2, 2, CONFIG);
+
+    const noMoveEvent = selectEvent("NO_MOVE");
 
     selectEvent("NEXT_FRAME").onEvent(() => {
         if (!ctx) return;
@@ -52,7 +56,7 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
             const currentMoveIsNotWherePlayerIs = currentMoveTo[0] !== player.x || currentMoveTo[1] !== player.y;
 
             if (status === "NO_MOVE" && currentMoveIsNotWherePlayerIs) {
-                selectEvent("NO_MOVE").executeEvent({});
+                noMoveEvent.executeEvent({});
                 drawErrorTo(currentMoveTo, ctx, CONFIG);
                 currentMoveTo = [player.x, player.y];
             }
@@ -138,8 +142,10 @@ function getHeading(currentMoveTo: Coord, player: any, CONFIG: Config) {
     const headingVertical = isHeaded.south || isHeaded.north;
     const headingHorizontal = isHeaded.east || isHeaded.west;
 
-    const headingPrefix = Object.keys(isHeaded).reduce((prefix, heading, idx) => {
-        if (isHeaded[heading]) return prefix + String(heading)[0].toUpperCase();
+    const headingPrefix = Object.keys(isHeaded).reduce((prefix, heading) => {
+        if (isHeaded[heading as keyof Direction]) {
+            return prefix + String(heading)[0].toUpperCase();
+        }
         else return prefix;
     }, "");
 
@@ -214,14 +220,13 @@ function moveToCurrent(collisionMap: Coord[], currentMoveTo: Coord, player: any,
         // we just need to find which direction is truthy which is the purpose of the find loop
 
         const selectedDirection = Object.keys(isHeaded).find(direction => {
-            if (!!isHeaded[direction]) {
+            if (!!isHeaded[direction as keyof Direction]) {
                 return direction;
             }
         });
 
-        if (selectedDirection && moveTo[selectedDirection]) {
-            console.log(moveTo[selectedDirection]);
-            return moveTo[selectedDirection]();
+        if (selectedDirection && moveTo[selectedDirection as keyof Direction]) {
+            return moveTo[selectedDirection as keyof Direction]();
         } else return undefined;
         
     }

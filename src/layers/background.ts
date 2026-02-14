@@ -1,10 +1,9 @@
-import { loadSpriteImage } from "../sprite";
 import type { Config } from "../types";
 import { adjustCanvasSizeAndScale } from "../utility";
 
 export async function generateBackgroundLayer(CONFIG: Config) {
 
-    const { WIDTH, HEIGHT, SIZE } = CONFIG;
+    const { WIDTH, HEIGHT } = CONFIG;
 
     const canvas = document.getElementById('background') as HTMLCanvasElement;
     adjustCanvasSizeAndScale(canvas, CONFIG);

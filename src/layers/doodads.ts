@@ -1,4 +1,4 @@
-import { loadSpriteFromSheet, loadSpriteImage, loadSpriteSheet } from "../sprite";
+import { loadSpriteFromSheet, loadSpriteSheet } from "../sprite";
 import type { Config, Coord } from "../types";
 import { adjustCanvasSizeAndScale } from "../utility";
 

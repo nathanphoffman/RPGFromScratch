@@ -19,6 +19,8 @@ export type Direction = {
     west: any, east: any, south: any, north: any 
 }
 
+export type CardinalDirection = "west" | "east" | "south" | "north";
+
 export type TerminalHook = (heading: string)=>void;
 
 export type Player = {

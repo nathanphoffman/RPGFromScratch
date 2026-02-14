@@ -12,7 +12,7 @@ const term = new XTerminal();
 export function startTerminal() {
 
     term.mount("#terminal");
-    const terminalElement = document.getElementsByClassName("xt")[0];
+    const terminalElement = document.getElementsByClassName("xt")[0] as HTMLElement;
 
     term.write("Hello World!\n");
     //term.clear();
@@ -93,8 +93,16 @@ function writeLine(...output: string[]) {
     addPrefix();
 }
 
+/*
+const DATA_EVENT = "data" as const;
+//type EVENTS = typeof DATA_EVENT | string;
+//term.clearLast();
 
-
+term.on(DATA_EVENT, (data) => {
+    // we should remove whitespace on either side
+    console.log(data);
+});
+*/
 
 // You see a 
 
@@ -117,16 +125,4 @@ const building: {
 }
 */
 
-
-
-
-const DATA_EVENT = "data" as const;
-type EVENTS = typeof DATA_EVENT | string;
-
-//term.clearLast();
-
-term.on(DATA_EVENT, (data) => {
-    // we should remove whitespace on either side
-    console.log(data);
-});
 

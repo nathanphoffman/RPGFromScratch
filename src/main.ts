@@ -13,7 +13,7 @@ import { startTerminal } from "./terminal";
 import { setupMusicPlayer } from "./sound";
 
 import type { Config } from "./types";
-import { startRain } from "./atmosphere/rain";
+//import { startRain } from "./atmosphere/rain";
 
 (async () => {
 
@@ -45,7 +45,6 @@ import { startRain } from "./atmosphere/rain";
 
   // once all assets are loaded we start the game
   const gameLoop = () => {
-    //if (playerLoop) playerLoop(collisionMap);
 
     // broadcasts to all logic to update
     selectEvent("NEXT_FRAME").executeEvent({});
