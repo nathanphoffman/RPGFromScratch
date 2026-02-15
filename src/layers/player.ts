@@ -1,5 +1,6 @@
 import { selectEvent, type MoveEvent } from "../events";
 import { loadSpriteImage } from "../sprite";
+import { loadPlayer } from "../state/playerState";
 import type { Axis, Config, Coord, Direction, Player } from "../types";
 import { adjustCanvasSizeAndScale, futureCollisionOnAxis } from "../utility";
 
@@ -16,12 +17,7 @@ export async function generatePlayerCanvasLayer(CONFIG: Config, collisionMap: an
 
     adjustCanvasSizeAndScale(canvas, CONFIG);
 
-    let player: Player = {
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        size: SIZE
-    };
-
+    let player = loadPlayer(CONFIG);
     let currentMoveTo: Coord = [player.x, player.y];
 
     const moveEvent = selectEvent<MoveEvent>("MOVE");

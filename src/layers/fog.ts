@@ -15,6 +15,5 @@ export async function generateFogLayer(CONFIG: Config) {
     selectEvent<MoveEvent>("MOVE").onEvent(({ headingPrefix, currentMoveTo, player })=>{
         const x = player.x;
     });
-    
 
 }

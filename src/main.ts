@@ -10,7 +10,7 @@ import { generadeDoodadsLayer } from "./layers/doodads";
 import { generateGridCanvasLayer } from "./layers/grid";
 import { generatePlayerCanvasLayer } from "./layers/player";
 import { startTerminal } from "./terminal";
-import { setupMusicPlayer } from "./sound";
+import { setupMusicPlayer } from "./atmosphere/sound";
 
 import type { Config } from "./types";
 //import { startRain } from "./atmosphere/rain";

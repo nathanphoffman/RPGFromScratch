@@ -1,4 +1,4 @@
-import { selectEvent } from "./events";
+import { selectEvent } from "../events";
 
 //const audio = document.getElementById("audio");
 let currentAudio : HTMLAudioElement | undefined = undefined;

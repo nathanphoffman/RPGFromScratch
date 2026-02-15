@@ -1,7 +1,7 @@
 import type { Coord, Player } from "./types";
 
 
-const EVENTS = ["MOVE", "CLICK", "NEXT_FRAME", "NO_MOVE"] as const;
+const EVENTS = ["MOVE", "CLICK", "NEXT_FRAME", "NO_MOVE", "LOAD_STATE", "SAVE_STATE"] as const;
 type EventName = typeof EVENTS[number];
 
 export type MoveEvent = {
