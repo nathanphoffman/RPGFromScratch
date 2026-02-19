@@ -43,10 +43,8 @@ import type { Config } from "./types";
 
   //startRain();
 
-  // once all assets are loaded we start the game
   const gameLoop = () => {
 
-    // broadcasts to all logic to update
     selectEvent("NEXT_FRAME").executeEvent({});
 
     // start the game at approximately 4fps

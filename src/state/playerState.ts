@@ -19,3 +19,7 @@ export function loadPlayer(CONFIG: Config) {
 export function setPlayer(newPlayer: Player) {
     PLAYER = newPlayer;
 }
+
+// the save file will have the player and the map contained within it
+// will be saved in session storage
+
